@@ -76,6 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
             return const Text("Loading");
           }
           else {
+            // Apparently, listview.builder has a reverse property
+            // https://stackoverflow.com/questions/55095773/reverse-list-in-listview-builder-in-flutter
             return ListView.builder(
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) {

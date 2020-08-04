@@ -23,6 +23,8 @@ environment:
 dependencies:
 
   cloud_firestore:
+  
+  location: ^3.0.0
 
   flutter:
     sdk: flutter
@@ -33,6 +35,9 @@ dependencies:
   cupertino_icons: ^0.1.3
 
 dev_dependencies:
+
+  test: ^1.14.4
+
   flutter_test:
     sdk: flutter
 

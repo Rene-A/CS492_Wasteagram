@@ -1,6 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wasteagram/models/wasteagram.dart';
+import 'package:wasteagram/models/waste_post.dart';
 
 class WasteagramDatabase {
 
@@ -12,7 +12,7 @@ class WasteagramDatabase {
   }
 
   // Saves the wasteagram to our database
-  void saveWasteagram(Wasteagram wasteagram) {
+  void saveWasteagram(WastePost wasteagram) {
     // From lectures on Firebase/Firestore
     Firestore.instance.collection(collectionName).add({
       'date': wasteagram.date.toString(),
