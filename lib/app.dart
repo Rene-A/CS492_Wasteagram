@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wasteagram/views/waste_post_list.dart';
 
 class App extends StatelessWidget {
   // This widget is the root of your application.
@@ -22,7 +23,7 @@ class App extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Placeholder(),
+      home: WastePostList(),
     );
   }
 }

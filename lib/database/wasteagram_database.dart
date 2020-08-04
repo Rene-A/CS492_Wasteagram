@@ -7,12 +7,12 @@ class WasteagramDatabase {
   static const String collectionName = 'posts';
 
   // Get the stream for the posts collection.
-  Stream<QuerySnapshot> get postsSnapshots {
+  static Stream<QuerySnapshot> get postsSnapshots {
     return Firestore.instance.collection(collectionName).snapshots();
   }
 
   // Saves the wasteagram to our database
-  void saveWasteagram(WastePost wasteagram) {
+  static void saveWasteagram(WastePost wasteagram) {
     // From lectures on Firebase/Firestore
     Firestore.instance.collection(collectionName).add({
       'date': wasteagram.date.toString(),

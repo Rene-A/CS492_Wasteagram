@@ -11,11 +11,11 @@ class WastePost {
   WastePost({this.date, this.imageURL, this.latitude, this.longitude, this.quantity});
 
   // The idea for this came from the lecture videos.  
-  WastePost.fromMap({Map<String, dynamic> map}) {
-    date = map['date'];
+  WastePost.fromDatabaseMap({Map<String, dynamic> map}) {
+    date = map['date'] is DateTime ? map['date'] : DateTime.parse(map['date']);
     imageURL = map['imageURL'];
-    latitude = map['latitude'];
-    longitude = map['longitude'];
+    latitude = map['latitude'] is double ? map['latitude'] : map['latitude'].toDouble();
+    longitude = map['longitude'] is double ? map['longitude'] : map['longitude'].toDouble();
     quantity = map['quantity'];
   }
 }
