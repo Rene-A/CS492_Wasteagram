@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:wasteagram/components/waste_post_tile.dart';
+import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/database/wasteagram_database.dart';
 import 'package:wasteagram/models/waste_post.dart';
 import 'package:wasteagram/views/waste_post_details.dart';
@@ -13,7 +17,6 @@ class WastePostList extends StatefulWidget {
 
 class _WastePostListState extends State<WastePostList> {
 
-  static const String title = 'Wasteagram';
   int counter = 0;
 
   @override
@@ -21,7 +24,7 @@ class _WastePostListState extends State<WastePostList> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(title + ' - ' + counter.toString()),
+        title: Text(Constants.appName + ' - ' + counter.toString()),
       ),
       body: StreamBuilder(
         stream: WasteagramDatabase.postsSnapshots,
@@ -69,17 +72,27 @@ class _MyFloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () => pushWastePostForm(context),
+      onPressed: () => _pushWastePostForm(context),
       child: const Icon(Icons.photo),
     );
   }
 
-  void pushWastePostForm(BuildContext context) {
+  void _pushWastePostForm(BuildContext context) async {
+
+    File image = await _pickImage();
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => WastePostForm()
+        builder: (context) => WastePostForm(image: image),
       )
     );
+  }
+
+  // From the documentation
+  // https://pub.dev/packages/image_picker
+  Future<File> _pickImage() async {
+    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    return File(pickedFile.path);
   }
 }
 
