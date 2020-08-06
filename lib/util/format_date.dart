@@ -14,3 +14,8 @@ String fullWeekdayMonthDayYear(DateTime dateTime) {
   return '$weekday, ${fullMonthDayYear(dateTime)}';
 }
 
+String shortWeekdayFullMonthDayYear(DateTime dateTime) {
+
+  String weekday = DateFormat.E().format(dateTime).toString();
+  return '$weekday, ${fullMonthDayYear(dateTime)}';
+}

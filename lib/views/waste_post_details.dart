@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/models/waste_post.dart';
 import 'package:wasteagram/util/format_date.dart';
+import 'package:wasteagram/util/size_utility.dart';
 
 class WastePostDetails extends StatelessWidget {
   final WastePost post;
@@ -13,13 +14,13 @@ class WastePostDetails extends StatelessWidget {
     
     final children = [
       _ColumnCell(
-        child: Text(fullWeekdayMonthDayYear(post.date), style: Theme.of(context).textTheme.headline4),
+        child: Text(shortWeekdayFullMonthDayYear(post.date), style: Theme.of(context).textTheme.headline5),
+      ),
+      _ImageColumnCell(
+        child: Image.network(post.imageURL, fit: BoxFit.fill,)
       ),
       _ColumnCell(
-        child: Image.network(post.imageURL),
-      ),
-      _ColumnCell(
-        child: Text('Items: ${post.quantity}'),
+        child: Text('Items: ${post.quantity}', style: Theme.of(context).textTheme.headline5,),
       ),
       _ColumnCell(
         child: Text('Location: (${post.latitude}, ${post.longitude})'),
@@ -46,10 +47,34 @@ class _ColumnCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Flexible(
+      child: Container(
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: child
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageColumnCell extends StatelessWidget {
+
+  final Widget child;
+
+  _ImageColumnCell({Key key, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
       alignment: Alignment.center,
-      child: child,
+      child: SizedBox(
+        height: getHeightFraction(context, 0.3),
+        width: getMaxWidth(context),
+        child: child
+      ),
     );
   }
 }

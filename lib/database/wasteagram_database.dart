@@ -13,8 +13,12 @@ class WasteagramDatabase {
   static const String collectionName = 'posts';
 
   // Get the stream for the posts collection.
+  // This post pointed me to the orderBy method:
+  // https://stackoverflow.com/questions/58044290/flutter-sort-data-firestore-with-streambuilder
+  // And this documentation helped show more advanced queries:
+  // https://firebase.flutter.dev/docs/firestore/usage/#querying
   static Stream<QuerySnapshot> get postsSnapshots {
-    return Firestore.instance.collection(collectionName).snapshots();
+    return Firestore.instance.collection(collectionName).orderBy('date', descending: true).snapshots();
   }
 
   // Saves the wasteagram to our database
