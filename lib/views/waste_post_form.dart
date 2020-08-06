@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'dart:wasm';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
+import 'package:wasteagram/components/counter_state_container.dart';
 import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/database/wasteagram_database.dart';
 import 'package:wasteagram/models/waste_post.dart';
@@ -22,9 +22,17 @@ class WastePostForm extends StatefulWidget {
 class _WastePostFormState extends State<WastePostForm> {
 
   static const String quantityError = 'Please provide a positive number.';
+  static const String numberHintText = 'Number of Wasted Items';
 
   final formKey = GlobalKey<FormState>();
   WastePost post = WastePost();
+  CounterState state;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    state = CounterStateContainer.of(context);
+  }
 
   // Information on preventing the resize of widgets because of the keyboard
   // https://stackoverflow.com/questions/46551268/when-the-keyboard-appears-the-flutter-widgets-resize-how-to-prevent-this
@@ -45,7 +53,6 @@ class _WastePostFormState extends State<WastePostForm> {
           child: IconButton(
             onPressed: _savePost, 
             icon: Icon(Icons.cloud_upload),
-            
           ),
         ),
       ),
@@ -74,7 +81,7 @@ class _WastePostFormState extends State<WastePostForm> {
       SizedBox(height: 10,),
       TextFormField(
         decoration: InputDecoration(
-          hintText: "Number of Wasted Items",
+          hintText: numberHintText,
           hintStyle: TextStyle(fontSize: 24),
         ),
         style: TextStyle(fontSize: 24),
@@ -118,6 +125,7 @@ class _WastePostFormState extends State<WastePostForm> {
       await _getCurrentLocation();
 
       WasteagramDatabase.saveWasteagram(post);
+      state.addToCounter(post.quantity);
       Navigator.of(context).pop();
     }
   }

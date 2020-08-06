@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wasteagram/components/counter_state_container.dart';
 import 'package:wasteagram/components/waste_post_tile.dart';
 import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/database/wasteagram_database.dart';
@@ -17,35 +18,27 @@ class WastePostList extends StatefulWidget {
 
 class _WastePostListState extends State<WastePostList> {
 
-  int counter = 0;
+  CounterState state;
+  bool initialCountCompleted = false;
+
+  @override
+  void didChangeDependencies() {
+    state = CounterStateContainer.of(context);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(Constants.appName + ' - ' + counter.toString()),
-      ),
-      body: StreamBuilder(
-        stream: WasteagramDatabase.postsSnapshots,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return CircularProgressIndicator();
-          }
-          else {
-            // Apparently, listview.builder has a reverse property
-            // https://stackoverflow.com/questions/55095773/reverse-list-in-listview-builder-in-flutter
-            return ListView.builder(
-              itemCount: snapshot.data.documents.length,
-              itemBuilder: (context, index) {
-                return _buildWastePostTile(context, snapshot.data.documents[index]);
-              },
-            );
-          }
-        },
-      ),
-      floatingActionButton: _MyFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    return StreamBuilder(
+      stream: WasteagramDatabase.postsSnapshots,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _getLoadingPage();
+        }
+        else {
+          return _getListPage(snapshot);
+        }
+      },
     );
   }
 
@@ -63,6 +56,42 @@ class _WastePostListState extends State<WastePostList> {
       MaterialPageRoute(
         builder: (context) => WastePostDetails(post: post)
       )
+    );
+  }
+
+  Widget _getListPage(AsyncSnapshot<dynamic> snapshot) {
+
+    if (initialCountCompleted == false) {
+      int counter = 0;
+
+      snapshot.data.documents.forEach((doc) => counter += doc['quantity']);
+      state.initializeCounter(counter);
+      initialCountCompleted = true;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(Constants.appName + ' - ' + state.counter.toString()),
+      ),
+      body: ListView.builder(
+        itemCount: snapshot.data.documents.length,
+        itemBuilder: (context, index) {
+          return _buildWastePostTile(context, snapshot.data.documents[index]);
+        },
+      ),
+      floatingActionButton: _MyFloatingActionButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _getLoadingPage() {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(Constants.loading),
+      ),
+      body: CircularProgressIndicator(),
     );
   }
 }

@@ -9,16 +9,21 @@ class CounterStateContainer extends StatefulWidget {
   CounterStateContainer({Key key, @required this.child}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CounterState();
+  State<StatefulWidget> createState() => CounterState();
 
-  static _CounterState of(BuildContext context) {
-    return (context.dependOnInheritedWidgetOfExactType(aspect: _CounterStorageContainer) as _CounterStorageContainer).appData;
+  static CounterState of(BuildContext context) {
+    // API has changed since the example code in the book. 
+    // https://stackoverflow.com/questions/59304242/inheritfromwidgetofexacttype-is-deprecated-use-dependoninheritedwidgetofexacttyp
+    // https://api.flutter.dev/flutter/widgets/BuildContext/dependOnInheritedWidgetOfExactType.html
+    return (context.dependOnInheritedWidgetOfExactType<_CounterStorageContainer>()).appData;
   }
 }
 
-class _CounterState extends State<CounterStateContainer> {
+class CounterState extends State<CounterStateContainer> {
 
   int counter = 0;
+
+  void initializeCounter(int initialCount) => counter = initialCount;
 
   void updateCounter(int newCount) {
     setState(() => counter = newCount);
@@ -42,7 +47,7 @@ class _CounterState extends State<CounterStateContainer> {
 }
 
 class _CounterStorageContainer extends InheritedWidget {
-  final _CounterState appData;
+  final CounterState appData;
 
   _CounterStorageContainer({Key key, @required this.appData, @required child}) : super(key: key, child: child);
 
