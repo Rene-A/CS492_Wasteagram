@@ -43,11 +43,19 @@ class _WastePostListState extends State<WastePostList> {
   }
 
   Widget _buildWastePostTile(BuildContext context, DocumentSnapshot document) {
+
+    const String tileLabel = 'Post creation date and number of wasted items.';
+    const String hint = 'Tap to get the full post details.';
     WastePost post = WastePost.fromDatabaseMap(map: document.data);
 
-    return WastePostTile(
-      post: post,
-      onTap: () => _pushWastePostDetails(context, post),
+    return Semantics(
+      button: true,
+      label: tileLabel,
+      hint: hint,
+      child: WastePostTile(
+        post: post,
+        onTap: () => _pushWastePostDetails(context, post),
+      ),
     );
   }
 
@@ -98,11 +106,20 @@ class _WastePostListState extends State<WastePostList> {
 
 class _MyFloatingActionButton extends StatelessWidget {
 
+  static const String label = 'Photo icon button.';
+  static const String onTapHint = 'Takes you to the post creation form.';
+
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => _pushWastePostForm(context),
-      child: const Icon(Icons.photo),
+      child: Semantics(
+        container: true,
+        button: true,
+        label: label,
+        onTapHint: onTapHint,
+        child: const Icon(Icons.photo),
+      ),
     );
   }
 

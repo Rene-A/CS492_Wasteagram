@@ -24,7 +24,7 @@ class _WastePostFormState extends State<WastePostForm> {
 
   static const String quantityError = 'Please provide a positive number.';
   static const String numberHintText = 'Number of Wasted Items';
-  static const String semanticButtonLabel = 'Upload your post';
+  static const String uploadButtonLabel = 'Upload your post';
 
   final formKey = GlobalKey<FormState>();
   WastePost post = WastePost();
@@ -40,6 +40,7 @@ class _WastePostFormState extends State<WastePostForm> {
   // https://stackoverflow.com/questions/46551268/when-the-keyboard-appears-the-flutter-widgets-resize-how-to-prevent-this
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -49,7 +50,6 @@ class _WastePostFormState extends State<WastePostForm> {
       body: _getFormBody(),
       floatingActionButton: _getUploadButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
     );
   }
 
@@ -64,24 +64,23 @@ class _WastePostFormState extends State<WastePostForm> {
       ),
     );
 
-    return Semantics(
-      label: semanticButtonLabel,
-      container: true,
-      button: true,
-      enabled: true,
-      hint: semanticButtonLabel,
-      child: SizedBox(
-        height: getHeightFraction(context, 0.15),
-        width: getMaxWidth(context),
-        child: FittedBox(
-          fit: BoxFit.fitWidth,
-          child: FloatingActionButton(   
-            onPressed: _savePost,
-            shape: ContinuousRectangleBorder(),
+    return SizedBox(
+      height: getHeightFraction(context, 0.15),
+      width: getMaxWidth(context),
+      child: FittedBox(
+        fit: BoxFit.fitWidth,
+        child: FloatingActionButton(
+          onPressed: _savePost,
+          shape: ContinuousRectangleBorder(),
+          backgroundColor: Colors.blue,
+          child: Semantics(
+            label: uploadButtonLabel,
+            button: true,
+            enabled: true,
+            hint: uploadButtonLabel,
             child: iconBox,
-            backgroundColor: Colors.blue,
-          )
-        )
+          ),
+        ),
       ),
     );
   }
@@ -90,23 +89,12 @@ class _WastePostFormState extends State<WastePostForm> {
 
     const double spaceBetweenFormFields = 10;
 
-    // The sized boxes help separate the input fields.  It looks better when you go to type input in as well.
-    // This is basically the same structure as shown in the lecture videos on forms.
-    // Discussion on parsing numbers is discussed here
-    // https://stackoverflow.com/questions/13167496/how-do-i-parse-a-string-into-a-number-with-dart
-    // https://api.dart.dev/stable/2.9.0/dart-core/int/tryParse.html
-    final columnChildren = [
-      SizedBox(height: spaceBetweenFormFields,),
-      SizedBox(
-        height: getHeightFraction(context, 0.3),
-        width: getMaxWidth(context),
-        child: Image.file(
-          widget.image, 
-          fit: BoxFit.fill,
-        ),
-      ),
-      SizedBox(height: spaceBetweenFormFields,),
-      TextFormField(
+    final Widget numberFormField = Semantics(
+      focused: true,
+      focusable: true,
+      hint: numberHintText,
+      label: numberHintText,
+      child: TextFormField(
         decoration: InputDecoration(
           hintText: numberHintText,
           hintStyle: CustomTextStyle.numberForm,
@@ -126,6 +114,25 @@ class _WastePostFormState extends State<WastePostForm> {
           }
         },
       ),
+    );
+
+    // The sized boxes help separate the input fields.  It looks better when you go to type input in as well.
+    // This is basically the same structure as shown in the lecture videos on forms.
+    // Discussion on parsing numbers is discussed here
+    // https://stackoverflow.com/questions/13167496/how-do-i-parse-a-string-into-a-number-with-dart
+    // https://api.dart.dev/stable/2.9.0/dart-core/int/tryParse.html
+    final columnChildren = [
+      SizedBox(height: spaceBetweenFormFields,),
+      SizedBox(
+        height: getHeightFraction(context, 0.3),
+        width: getMaxWidth(context),
+        child: Image.file(
+          widget.image, 
+          fit: BoxFit.fill,
+        ),
+      ),
+      SizedBox(height: spaceBetweenFormFields,),
+      numberFormField
     ];
 
     // https://medium.com/zipper-studios/the-keyboard-causes-the-bottom-overflowed-error-5da150a1c660
