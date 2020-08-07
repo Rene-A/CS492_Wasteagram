@@ -7,6 +7,7 @@ import 'package:wasteagram/components/counter_state_container.dart';
 import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/database/wasteagram_database.dart';
 import 'package:wasteagram/models/waste_post.dart';
+import 'package:wasteagram/style/custom_text_style.dart';
 import 'package:wasteagram/util/size_utility.dart';
 
 // Similar structure to my project 4 form page.
@@ -23,6 +24,7 @@ class _WastePostFormState extends State<WastePostForm> {
 
   static const String quantityError = 'Please provide a positive number.';
   static const String numberHintText = 'Number of Wasted Items';
+  static const String semanticButtonLabel = 'Upload your post';
 
   final formKey = GlobalKey<FormState>();
   WastePost post = WastePost();
@@ -45,31 +47,56 @@ class _WastePostFormState extends State<WastePostForm> {
         title: Text(Constants.newPost),
       ),
       body: _getFormBody(),
-      floatingActionButton: Container(
-        height: getHeightFraction(context, 0.2),
-        width: getMaxWidth(context),
-        color: Colors.blue,
-        child: FittedBox(
-          child: IconButton(
-            onPressed: _savePost, 
-            icon: Icon(Icons.cloud_upload),
-          ),
-        ),
-      ),
+      floatingActionButton: _getUploadButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
     );
   }
 
+  Widget _getUploadButton() {
+
+    final Widget iconBox = FractionallySizedBox(
+      heightFactor: 0.3,
+      widthFactor: 0.4,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Icon(Icons.cloud_upload, color: Colors.white)
+      ),
+    );
+
+    return Semantics(
+      label: semanticButtonLabel,
+      container: true,
+      button: true,
+      enabled: true,
+      hint: semanticButtonLabel,
+      child: SizedBox(
+        height: getHeightFraction(context, 0.15),
+        width: getMaxWidth(context),
+        child: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: FloatingActionButton(   
+            onPressed: _savePost,
+            shape: ContinuousRectangleBorder(),
+            child: iconBox,
+            backgroundColor: Colors.blue,
+          )
+        )
+      ),
+    );
+  }
 
   Widget _getFormBody() {
+
+    const double spaceBetweenFormFields = 10;
+
     // The sized boxes help separate the input fields.  It looks better when you go to type input in as well.
     // This is basically the same structure as shown in the lecture videos on forms.
     // Discussion on parsing numbers is discussed here
     // https://stackoverflow.com/questions/13167496/how-do-i-parse-a-string-into-a-number-with-dart
     // https://api.dart.dev/stable/2.9.0/dart-core/int/tryParse.html
     final columnChildren = [
-      SizedBox(height: 10,),
+      SizedBox(height: spaceBetweenFormFields,),
       SizedBox(
         height: getHeightFraction(context, 0.3),
         width: getMaxWidth(context),
@@ -78,13 +105,13 @@ class _WastePostFormState extends State<WastePostForm> {
           fit: BoxFit.fill,
         ),
       ),
-      SizedBox(height: 10,),
+      SizedBox(height: spaceBetweenFormFields,),
       TextFormField(
         decoration: InputDecoration(
           hintText: numberHintText,
-          hintStyle: TextStyle(fontSize: 24),
+          hintStyle: CustomTextStyle.numberForm,
         ),
-        style: TextStyle(fontSize: 24),
+        style: CustomTextStyle.numberForm,
         textAlign: TextAlign.center,
         autofocus: true,
         keyboardType: TextInputType.number,
@@ -139,5 +166,3 @@ class _WastePostFormState extends State<WastePostForm> {
     post.longitude = locationData.longitude;
   }
 }
-
-

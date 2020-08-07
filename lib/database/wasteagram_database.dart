@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as Path;
 
 import 'package:wasteagram/models/waste_post.dart';
@@ -32,13 +31,6 @@ class WasteagramDatabase {
       'quantity': wasteagram.quantity
     });
   }
-
-  // // This is adapted from the firebase_storage package example documenation.
-  // static void getImage(String url) async {
-  //   final http.Response downloadData = await http.get(url);
-
-    
-  // }
 
   // Adapted from the lecture on Firestore
   // Accepts the image file to store in Firebase storage.  

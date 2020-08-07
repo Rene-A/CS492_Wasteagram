@@ -110,17 +110,26 @@ class _MyFloatingActionButton extends StatelessWidget {
 
     File image = await _pickImage();
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => WastePostForm(image: image),
-      )
-    );
+    if (image != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => WastePostForm(image: image),
+        )
+      );
+    }
   }
 
   // From the documentation
   // https://pub.dev/packages/image_picker
   Future<File> _pickImage() async {
     final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+
+    // If the user doesn't pick an image, then pickedFile will be null.  It looks like the exception
+    // is caught and handled by the operating system, but I should handle it explicitly.
+    if (pickedFile == null) {
+      return null;
+    }
+
     return File(pickedFile.path);
   }
 }
