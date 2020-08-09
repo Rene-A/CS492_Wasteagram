@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wasteagram/components/counter_state_container.dart';
 import 'package:wasteagram/components/waste_post_tile.dart';
 import 'package:wasteagram/constants/constants.dart';
@@ -17,7 +18,6 @@ class WastePostList extends StatefulWidget {
 }
 
 class _WastePostListState extends State<WastePostList> {
-
   CounterState state;
   bool initialCountCompleted = false;
 
@@ -33,17 +33,17 @@ class _WastePostListState extends State<WastePostList> {
       stream: WasteagramDatabase.postsSnapshots,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _getLoadingPage();
-        }
-        else {
-          return _getListPage(snapshot);
+          return _loadingPage;
+        } else if (snapshot.hasError) {
+          return _errorPage;
+        } else {
+          return _listPage(snapshot);
         }
       },
     );
   }
 
   Widget _buildWastePostTile(BuildContext context, DocumentSnapshot document) {
-
     const String tileLabel = 'Post creation date and number of wasted items.';
     const String hint = 'Tap to get the full post details.';
     WastePost post = WastePost.fromDatabaseMap(map: document.data);
@@ -61,14 +61,10 @@ class _WastePostListState extends State<WastePostList> {
 
   void _pushWastePostDetails(BuildContext context, WastePost post) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => WastePostDetails(post: post)
-      )
-    );
+        MaterialPageRoute(builder: (context) => WastePostDetails(post: post)));
   }
 
-  Widget _getListPage(AsyncSnapshot<dynamic> snapshot) {
-
+  Widget _listPage(AsyncSnapshot<dynamic> snapshot) {
     if (initialCountCompleted == false) {
       int counter = 0;
 
@@ -93,7 +89,7 @@ class _WastePostListState extends State<WastePostList> {
     );
   }
 
-  Widget _getLoadingPage() {
+  Widget get _loadingPage {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -102,10 +98,24 @@ class _WastePostListState extends State<WastePostList> {
       body: CircularProgressIndicator(),
     );
   }
+
+  Widget get _errorPage {
+    const String error =
+        "An error occurred when trying to access the database.";
+
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(Constants.appName),
+      ),
+      body: Center(
+        child: Text(error),
+      ),
+    );
+  }
 }
 
 class _MyFloatingActionButton extends StatelessWidget {
-
   static const String label = 'Photo icon button.';
   static const String onTapHint = 'Takes you to the post creation form.';
 
@@ -124,22 +134,26 @@ class _MyFloatingActionButton extends StatelessWidget {
   }
 
   void _pushWastePostForm(BuildContext context) async {
-
     File image = await _pickImage();
 
     if (image != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => WastePostForm(image: image),
-        )
-      );
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => WastePostForm(image: image),
+      ));
     }
   }
 
   // From the documentation
   // https://pub.dev/packages/image_picker
   Future<File> _pickImage() async {
-    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    PermissionStatus _permissionStatus = await Permission.storage.request();
+
+    if (_permissionStatus.isDenied) {
+      return null;
+    }
+
+    final pickedFile =
+        await ImagePicker().getImage(source: ImageSource.gallery);
 
     // If the user doesn't pick an image, then pickedFile will be null.  It looks like the exception
     // is caught and handled by the operating system, but I should handle it explicitly.
@@ -150,4 +164,3 @@ class _MyFloatingActionButton extends StatelessWidget {
     return File(pickedFile.path);
   }
 }
-

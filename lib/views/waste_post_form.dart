@@ -21,7 +21,6 @@ class WastePostForm extends StatefulWidget {
 }
 
 class _WastePostFormState extends State<WastePostForm> {
-
   static const String quantityError = 'Please provide a positive number.';
   static const String numberHintText = 'Number of Wasted Items';
   static const String uploadButtonLabel = 'Upload your post';
@@ -40,28 +39,25 @@ class _WastePostFormState extends State<WastePostForm> {
   // https://stackoverflow.com/questions/46551268/when-the-keyboard-appears-the-flutter-widgets-resize-how-to-prevent-this
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         centerTitle: true,
         title: Text(Constants.newPost),
       ),
-      body: _getFormBody(),
-      floatingActionButton: _getUploadButton(),
+      body: _formBody(),
+      floatingActionButton: _uploadButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _getUploadButton() {
-
+  Widget _uploadButton() {
     final Widget iconBox = FractionallySizedBox(
       heightFactor: 0.3,
       widthFactor: 0.4,
       child: FittedBox(
-        fit: BoxFit.contain,
-        child: Icon(Icons.cloud_upload, color: Colors.white)
-      ),
+          fit: BoxFit.contain,
+          child: Icon(Icons.cloud_upload, color: Colors.white)),
     );
 
     return SizedBox(
@@ -85,8 +81,7 @@ class _WastePostFormState extends State<WastePostForm> {
     );
   }
 
-  Widget _getFormBody() {
-
+  Widget _formBody() {
     const double spaceBetweenFormFields = 10;
 
     final Widget numberFormField = Semantics(
@@ -108,8 +103,7 @@ class _WastePostFormState extends State<WastePostForm> {
           int potentialNumber = int.tryParse(value);
           if (potentialNumber != null && potentialNumber > 0) {
             return null;
-          }
-          else {
+          } else {
             return quantityError;
           }
         },
@@ -122,16 +116,20 @@ class _WastePostFormState extends State<WastePostForm> {
     // https://stackoverflow.com/questions/13167496/how-do-i-parse-a-string-into-a-number-with-dart
     // https://api.dart.dev/stable/2.9.0/dart-core/int/tryParse.html
     final columnChildren = [
-      SizedBox(height: spaceBetweenFormFields,),
+      SizedBox(
+        height: spaceBetweenFormFields,
+      ),
       SizedBox(
         height: getHeightFraction(context, 0.3),
         width: getMaxWidth(context),
         child: Image.file(
-          widget.image, 
+          widget.image,
           fit: BoxFit.fill,
         ),
       ),
-      SizedBox(height: spaceBetweenFormFields,),
+      SizedBox(
+        height: spaceBetweenFormFields,
+      ),
       numberFormField
     ];
 
@@ -142,14 +140,14 @@ class _WastePostFormState extends State<WastePostForm> {
         key: formKey,
         child: SingleChildScrollView(
           child: Column(
-            children: columnChildren, 
+            children: columnChildren,
           ),
         ),
       ),
     );
   }
 
-  void _savePost() async{
+  void _savePost() async {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       post.date = DateTime.now();
@@ -165,8 +163,41 @@ class _WastePostFormState extends State<WastePostForm> {
   }
 
   // The lecture video on location services was the base for this function.
-  Future<void> _getCurrentLocation() async { 
+  // The code to manually check for the Location Service status and Permission
+  // status is from the location package documenation.
+  // https://pub.dev/packages/location
+  // (0, 0) coordinates will be my indication that location service
+  // was not available/granted when trying to save the wasteagram.
+  Future<void> _getCurrentLocation() async {
+    bool _serviceEnabled;
+    PermissionStatus _permssionGranted;
+
     var locationService = Location();
+
+    _serviceEnabled = await locationService.serviceEnabled();
+
+    if (!_serviceEnabled) {
+      _serviceEnabled = await locationService.requestService();
+
+      if (!_serviceEnabled) {
+        post.latitude = 0;
+        post.longitude = 0;
+        return;
+      }
+    }
+
+    _permssionGranted = await locationService.hasPermission();
+
+    if (_permssionGranted == PermissionStatus.denied) {
+      _permssionGranted = await locationService.requestPermission();
+
+      if (_permssionGranted != PermissionStatus.granted) {
+        post.latitude = 0;
+        post.longitude = 0;
+        return;
+      }
+    }
+
     var locationData = await locationService.getLocation();
 
     post.latitude = locationData.latitude;
