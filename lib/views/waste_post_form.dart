@@ -24,6 +24,7 @@ class _WastePostFormState extends State<WastePostForm> {
   static const String quantityError = 'Please provide a positive number.';
   static const String numberHintText = 'Number of Wasted Items';
   static const String uploadButtonLabel = 'Upload your post';
+  static const String imageLabel = "Image from your gallery.";
 
   final formKey = GlobalKey<FormState>();
   WastePost post = WastePost();
@@ -122,9 +123,12 @@ class _WastePostFormState extends State<WastePostForm> {
       SizedBox(
         height: getHeightFraction(context, 0.3),
         width: getMaxWidth(context),
-        child: Image.file(
-          widget.image,
-          fit: BoxFit.fill,
+        child: Semantics(
+          label: imageLabel,
+          child: Image.file(
+            widget.image,
+            fit: BoxFit.fill,
+          ),
         ),
       ),
       SizedBox(
