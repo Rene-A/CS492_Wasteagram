@@ -9,6 +9,7 @@
 .history
 .svn/
 lib/constants/reserved_constants.dart
+android/app/src/google-services.json
 
 # IntelliJ related
 *.iml

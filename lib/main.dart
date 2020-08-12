@@ -10,14 +10,15 @@ import 'package:wasteagram/constants/reserved_constants.dart';
 final SentryClient sentry = SentryClient(dsn: ReservedConstants.sentryDSN);
 
 void main() {
+  
+  WidgetsFlutterBinding.ensureInitialized();
   // From our lectures on Sentry and crash reporting
   FlutterError.onError = (FlutterErrorDetails details) {
     Zone.current.handleUncaughtError(details.exception, details.stack);
   };
-  runZoned( () {
+  runZoned(() {
     runApp(CounterStateContainer(child: myApp.App()));
   }, onError: (error, stackTrace) {
     myApp.App.reportError(sentry, error, stackTrace);
   });
-  
 }

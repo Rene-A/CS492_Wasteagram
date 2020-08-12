@@ -7,8 +7,8 @@ import 'package:wasteagram/util/format_date.dart';
 import 'package:wasteagram/util/size_utility.dart';
 
 class WastePostDetails extends StatelessWidget {
-
-  static const imageLabel = "Image of the wasted item(s).";
+  static const String pageName = "WastePostDetails";
+  static const String imageLabel = "Image of the wasted item(s).";
   final WastePost post;
 
   WastePostDetails({Key key, this.post}) : super(key: key);
@@ -25,7 +25,7 @@ class WastePostDetails extends StatelessWidget {
           container: true,
           image: true,
           child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage, 
+            placeholder: kTransparentImage,
             image: post.imageURL,
             imageSemanticLabel: imageLabel,
           ),

@@ -12,6 +12,7 @@ import 'package:wasteagram/util/size_utility.dart';
 
 // Similar structure to my project 4 form page.
 class WastePostForm extends StatefulWidget {
+  static final String pageName = "WastePostForm";
   final File image;
 
   WastePostForm({Key key, this.image}) : super(key: key);

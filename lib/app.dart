@@ -1,3 +1,6 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
+
 import 'package:flutter/foundation.dart' as Foundation;
 import 'package:flutter/material.dart';
 import 'package:sentry/sentry.dart';
@@ -5,6 +8,17 @@ import 'package:wasteagram/constants/constants.dart';
 import 'package:wasteagram/views/waste_post_list.dart';
 
 class App extends StatelessWidget {
+  App({Key key}) : super(key: key) {
+    _logStartUp();
+  }
+
+  // Firebase analytics code taken from lectures which looks to have taken the
+  // logic from the documentation:
+  // https://pub.dev/packages/firebase_analytics/example
+  static FirebaseAnalytics analytics = FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
+
   // Sentry function logic is directly from the lecture on Sentry and crash reporting.
   static Future<void> reportError(
       SentryClient sentry, dynamic error, dynamic stackTrace) async {
@@ -39,7 +53,14 @@ class App extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: WastePostList(),
+      navigatorObservers: <NavigatorObserver>[observer],
+      home: WastePostList(
+        analytics: analytics,
+      ),
     );
+  }
+
+  Future<void> _logStartUp() async {
+    await analytics.logAppOpen();
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,6 +14,10 @@ import 'package:wasteagram/views/waste_post_details.dart';
 import 'package:wasteagram/views/waste_post_form.dart';
 
 class WastePostList extends StatefulWidget {
+  final FirebaseAnalytics analytics;
+
+  WastePostList({Key key, this.analytics}) : super(key: key);
+
   @override
   _WastePostListState createState() => _WastePostListState();
 }
@@ -32,10 +37,10 @@ class _WastePostListState extends State<WastePostList> {
     return StreamBuilder(
       stream: WasteagramDatabase.postsSnapshots,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return _loadingPage;
-        } else if (snapshot.hasError) {
+        if (snapshot.hasError) {
           return _errorPage;
+        } else if (!snapshot.hasData) {
+          return _loadingPage;
         } else {
           return _listPage(snapshot);
         }
@@ -59,12 +64,21 @@ class _WastePostListState extends State<WastePostList> {
     );
   }
 
-  void _pushWastePostDetails(BuildContext context, WastePost post) {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => WastePostDetails(post: post)));
+  void _pushWastePostDetails(BuildContext context, WastePost post) async {
+    // I'll send a report to Firebase Analytics
+    await _logPageView(post);
+
+    // The settings parameter is necessary to deal with an odd issue.
+    // https://github.com/FirebaseExtended/flutterfire/issues/2488
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => WastePostDetails(post: post),
+      settings: RouteSettings(name: WastePostDetails.pageName),
+    ));
   }
 
   Widget _listPage(AsyncSnapshot<dynamic> snapshot) {
+    int numberOfPosts = snapshot.data.documents.length;
+
     if (initialCountCompleted == false) {
       int counter = 0;
 
@@ -78,14 +92,23 @@ class _WastePostListState extends State<WastePostList> {
         centerTitle: true,
         title: Text(Constants.appName + ' - ' + state.counter.toString()),
       ),
-      body: ListView.builder(
-        itemCount: snapshot.data.documents.length,
-        itemBuilder: (context, index) {
-          return _buildWastePostTile(context, snapshot.data.documents[index]);
-        },
-      ),
+      body: numberOfPosts == 0
+          ? _noEntryBody
+          : ListView.builder(
+              itemCount: snapshot.data.documents.length,
+              itemBuilder: (context, index) {
+                return _buildWastePostTile(
+                    context, snapshot.data.documents[index]);
+              },
+            ),
       floatingActionButton: _MyFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget get _noEntryBody {
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 
@@ -95,7 +118,9 @@ class _WastePostListState extends State<WastePostList> {
         centerTitle: true,
         title: Text(Constants.loading),
       ),
-      body: CircularProgressIndicator(),
+      body: Center(
+        child: CircularProgressIndicator()
+      ),
     );
   }
 
@@ -113,6 +138,20 @@ class _WastePostListState extends State<WastePostList> {
       ),
     );
   }
+
+  // Analytics functions
+  Future<void> _logPageView(WastePost post) async {
+    // One strategy to get unique identifiers is to mix different keys.
+    // The date object could probably be considered sufficiently unique since
+    // it is unlikely that a given user would be able to create two posts at
+    // the same time.
+    String identifier = post.date.toString() + post.quantity.toString();
+
+    await widget.analytics.logSelectContent(
+      contentType: "Detailed Post View",
+      itemId: identifier,
+    );
+  }
 }
 
 class _MyFloatingActionButton extends StatelessWidget {
@@ -128,7 +167,7 @@ class _MyFloatingActionButton extends StatelessWidget {
         button: true,
         label: label,
         onTapHint: onTapHint,
-        child: const Icon(Icons.photo),
+        child: const Icon(Icons.photo_camera),
       ),
     );
   }
@@ -137,8 +176,11 @@ class _MyFloatingActionButton extends StatelessWidget {
     File image = await _pickImage();
 
     if (image != null) {
+      // The settings parameter is necessary to deal with an odd issue.
+      // https://github.com/FirebaseExtended/flutterfire/issues/2488
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => WastePostForm(image: image),
+        settings: RouteSettings(name: WastePostForm.pageName),
       ));
     }
   }
